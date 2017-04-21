@@ -4,7 +4,7 @@ import time
 import argparse
 
 PARSER = argparse.ArgumentParser(description="TL-WR740N CLI Tool by Kanishk Singh.")
-PARSER.add_argument('-reconnect', '-r', type=str, help="Reconnect", required=False, default="")
+PARSER.add_argument('-reconnect', '-r', help="Reconnect", action="store_true")
 ARGS = PARSER.parse_args()
 
 try:
@@ -13,7 +13,7 @@ try:
 
     # Navigate to Router page
     print " [#] Authenticating..."
-    DRIVER.get("http://admin:notadmin@192.168.0.1")
+    DRIVER.get("http://admin:admin@192.168.0.1")
 
     time.sleep(5) # Wait for 5 seconds
     DRIVER.switch_to_frame(DRIVER.find_element_by_name("bottomLeftFrame")) # Switch the frames
@@ -66,7 +66,7 @@ try:
         DRIVER.switch_to_default_content()
         status()
 
-    if ARGS.reconnect == "t":
+    if ARGS.reconnect:
         reconnect2()
     else:
         status()
