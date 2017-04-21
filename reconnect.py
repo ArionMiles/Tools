@@ -1,54 +1,77 @@
+'''Import selenium, time & argparse'''
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import time
+import argparse
+
+PARSER = argparse.ArgumentParser(description="TL-WR740N CLI Tool by Kanishk Singh.")
+PARSER.add_argument('-reconnect', '-r', type=str, help="Reconnect", required=False, default="")
+ARGS = PARSER.parse_args()
 
 try:
-	print (" [#] Initializing...")
-	driver = webdriver.PhantomJS("phantomjs.exe") ## Create a new instance of the PhantomJS driver ##
+    print " [#] Initializing..."
+    DRIVER = webdriver.PhantomJS("phantomjs.exe") # Create a new instance of the PhantomJS DRIVER
 
-	## Navigate to Router page ##
-	print (" [#] Opening router page...")
-	driver.get("http://admin:pass@192.168.0.1")
+    # Navigate to Router page
+    print " [#] Authenticating..."
+    DRIVER.get("http://admin:notadmin@192.168.0.1")
 
-	time.sleep(10) ## Wait for 5 seconds ##
-	driver.switch_to_frame(driver.find_element_by_name("bottomLeftFrame")) ## Switch the frames ##
-	driver.find_element_by_id("a3").click(); ## Navigate to Network Tab ##
-	driver.switch_to_default_content(); ## Switch back to the "default content" (that is, out of the frames) ##
+    time.sleep(5) # Wait for 5 seconds
+    DRIVER.switch_to_frame(DRIVER.find_element_by_name("bottomLeftFrame")) # Switch the frames
+    DRIVER.find_element_by_id("a3").click() # Navigate to Network Tab
+    DRIVER.switch_to_default_content() # Switch back to the "default content" (out of the frames)
 
-	def reconnect():
-		## Disconnect ##
-		print (" [#] Disconnecting...")
-		driver.find_element_by_name("Disconnect").click();
-		driver.switch_to_default_content()
 
-		## Reconnect ##
-		print(" [#] Reconnecting after sleeping for 5s...")
-		time.sleep(5) ## Wait for 5 seconds ##
-		driver.switch_to_frame(driver.find_element_by_name("mainFrame"))
-		driver.find_element_by_name("Connect").click();
-		driver.switch_to_default_content()
-		status()
+    def reconnect():
+        '''Disconnect'''
+        print " [#] Disconnecting..."
+        DRIVER.find_element_by_name("Disconnect").click()
+        DRIVER.switch_to_default_content()
 
-	def status():
-		print(" [#] Checking status...")
-		time.sleep(10) ## Wait for 10 seconds ##
-		driver.switch_to_frame(driver.find_element_by_name("mainFrame"))
-		linkStat = driver.find_element_by_id("linkStat");
-		stat = linkStat.text;
-		t_connect = "Connecting...";
-		t_connect2 = "Disconnected!";
-		if stat == t_connect: 
-			print (" [-] Connection error. Reconnecting...");
-			reconnect()
-		elif stat == t_connect2:
-			print (" [!] Disconnected! Connecting now...");
-			reconnect()
-		else:
-			print " [+] " + stat;
-	status()
+        ## Reconnect ##
+        print " [#] Reconnecting after sleeping for 5s..."
+        time.sleep(5) ## Wait for 5 seconds ##
+        DRIVER.switch_to_frame(DRIVER.find_element_by_name("mainFrame"))
+        DRIVER.find_element_by_name("Connect").click()
+        DRIVER.switch_to_default_content()
+        status()
+
+    def status():
+        '''Check status'''
+        print " [#] Checking status..."
+        time.sleep(10) ## Wait for 10 seconds ##
+        DRIVER.switch_to_frame(DRIVER.find_element_by_name("mainFrame"))
+        linkStat = DRIVER.find_element_by_id("linkStat")
+        stat = linkStat.text
+        t_connect = "Connecting..."
+        t_connect2 = "Disconnected!"
+        if stat == t_connect or stat == t_connect2:
+            print " [-] Connection error. Reconnecting..."
+            reconnect()
+        else:
+            print " [+] " + stat
+
+    def reconnect2():
+        '''Force reconnect'''
+        print " [#] Force reconnecting..."
+        time.sleep(10) ## Wait for 10 seconds ##
+        DRIVER.switch_to_frame(DRIVER.find_element_by_name("mainFrame"))
+        print " [#] Disconnecting..."
+        DRIVER.find_element_by_name("Disconnect").click()
+        DRIVER.switch_to_default_content()
+        ## Reconnect ##
+        print " [#] Reconnecting after sleeping for 5s..."
+        time.sleep(5) ## Wait for 5 seconds ##
+        DRIVER.switch_to_frame(DRIVER.find_element_by_name("mainFrame"))
+        DRIVER.find_element_by_name("Connect").click()
+        DRIVER.switch_to_default_content()
+        status()
+
+    if ARGS.reconnect == "t":
+        reconnect2()
+    else:
+        status()
+
 except KeyboardInterrupt:
-	print (" [!] Operation terminated!")
+    print " [!] Operation terminated!"
 
-driver.quit() ## Exit ##
+DRIVER.quit() # Exit
